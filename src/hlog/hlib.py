@@ -31,7 +31,44 @@ class ConsoleErrorHandler(logging.StreamHandler):
 class ConsoleInfoHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
         logging.StreamHandler.__init__(self, *args, **kwargs)
-        
+
+
+class TlsSMTPHandler(logging.handlers.SMTPHandler):
+    def emit(self, record):
+        """
+        Emit a record.
+
+        Format the record and send it to the specified addressees.
+        """
+        try:
+            import smtplib
+            import string # for tls add this line
+            try:
+                from email.utils import formatdate
+            except ImportError:
+                formatdate = self.date_time
+            port = self.mailport
+            if not port:
+                port = smtplib.SMTP_PORT
+            smtp = smtplib.SMTP(self.mailhost, port)
+            msg = self.format(record)
+            msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
+                            self.fromaddr,
+                            string.join(self.toaddrs, ","),
+                            self.getSubject(record),
+                            formatdate(), msg)
+            if self.username:
+                smtp.ehlo() # for tls add this line
+                smtp.starttls() # for tls add this line
+                smtp.ehlo() # for tls add this line
+                smtp.login(self.username, self.password)
+            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            smtp.quit()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
 
 class ColorFormatter(logging.Formatter):
     
@@ -43,18 +80,10 @@ class ColorFormatter(logging.Formatter):
         'DEBUG'    : BLUE,
         'CRITICAL' : YELLOW,
         'ERROR'    : RED,
-        'RED'      : RED,
-        'GREEN'    : GREEN,
-        'YELLOW'   : YELLOW,
-        'BLUE'     : BLUE,
-        'MAGENTA'  : MAGENTA,
-        'CYAN'     : CYAN,
-        'WHITE'    : WHITE,
     }
     
     RESET_SEQ = "\033[0m"
     COLOR_SEQ = "\033[1;%dm"
-    BOLD_SEQ  = "\033[1m"
     
     def __init__(self, *args, **kwargs):
         # can't do super(...) here because Formatter is an old school class
@@ -65,7 +94,6 @@ class ColorFormatter(logging.Formatter):
         color     = self.COLOR_SEQ % (30 + self.COLORS[levelname])
         message   = logging.Formatter.format(self, record)
         message   = message.replace("$RESET", self.RESET_SEQ)\
-                           .replace("$BOLD",  self.BOLD_SEQ)\
                            .replace("$COLOR", color)
         for k,v in self.COLORS.items():
             message = message.replace("$" + k,    self.COLOR_SEQ % (v+30))\
