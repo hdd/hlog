@@ -1,12 +1,12 @@
+import os,sys
 import logging
-
-class ConsoleErrorHandler(logging.StreamHandler):
-    def __init__(self, *args, **kwargs):
-        logging.StreamHandler.__init__(self, *args, **kwargs)
 
 class ConsoleInfoHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
         logging.StreamHandler.__init__(self, *args, **kwargs)
+        
+        if os.environ.has_key("DEBUG"):
+            self.setLevel(logging.DEBUG)
 
 class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
     def emit(self, record):
@@ -14,6 +14,9 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         Emit a record.
 
         Format the record and send it to the specified addressees.
+        
+        original code from 
+        #http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to-use-gmail-smtp-server.txt.
         """
         try:
             import smtplib
