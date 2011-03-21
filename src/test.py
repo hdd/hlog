@@ -27,5 +27,5 @@ class TestTest(MyTest):
     
 T=TestTest()
 T.print1()
-T.print2()
 T.print3()
+T.print2()

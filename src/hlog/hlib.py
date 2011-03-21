@@ -1,5 +1,6 @@
 import os,sys
 import logging
+from pprint import pformat
 
 class ConsoleInfoHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
@@ -19,11 +20,6 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         #http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to-use-gmail-smtp-server.txt.
         """
         
-        toaddrs = self.toaddrs
-        subject = self.subject
-        fromaddr = self.fromaddr
-        username = self.username
-
         try:
             import smtplib
             import string # for tls add this line
@@ -41,12 +37,25 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             smtp = smtplib.SMTP(self.mailhost, port)
             msg = self.format(record)
             
+            filename = os.path.basename(record.pathname)
+            
+            #    TODO : CREATE HTML EMAIL
+            body=[]
+            body.append("USER : %s"%os.environ["USER"])
+            body.append("PATH : \n%s"%(pformat(os.environ["PATH"].split(":"))))
+            
+            if "PYTHON_PATH" in os.environ:
+                body.append("PYTHON PATH : \n%s"%os.environ["PYTHON_PATH"])
+
+            body.append(msg)
+            body="\n\n".join(body)
+            
             output_msg=[]
             output_msg.append("From :%s\r\n"%self.fromaddr)
             output_msg.append("To :%s\r\n"%string.join(self.toaddrs, ","))
-            output_msg.append("Subject: %s\r\n"%self.getSubject(record))
+            output_msg.append("Subject: %s %s\r\n"%(self.getSubject(record),filename))
             output_msg.append("Date: %s\r\n\r\n"%formatdate())
-            output_msg.append("%s :"%msg)
+            output_msg.append("%s"%body)
             
             msg= "".join(output_msg)
             
@@ -55,7 +64,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
                 smtp.starttls() # for tls add this line
                 smtp.ehlo() # for tls add this line
                 smtp.login(self.username, self.password)
-                
+            
             smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
         except (KeyboardInterrupt, SystemExit):
