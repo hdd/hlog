@@ -57,7 +57,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
                 smtp.ehlo() # for tls add this line
                 smtp.login(self.username, self.password)
                 
-            #smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
         except (KeyboardInterrupt, SystemExit):
             raise
