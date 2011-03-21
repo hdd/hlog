@@ -11,17 +11,21 @@ class MyTest(object):
         log.debug("debug mode")
         
     def print2(self):
-        log.error("error mode")
+        try:
+            0/0
+        except:
+            log.error("critical Error")
         
     def print3(self):
-        log.warning("warning mode")   
-
-    def print4(self):
-        log.critical("critical mode")
-        sys.exit(0)
-
-M=MyTest()
-M.print1()
-M.print2()
-M.print3()
-M.print4()
+        log.warning("warning mode")
+        
+        
+class TestTest(MyTest):
+    def __init__(self):
+        super(TestTest,self).__init__()
+    
+    
+T=TestTest()
+T.print1()
+T.print2()
+T.print3()
