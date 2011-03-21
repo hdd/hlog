@@ -10,7 +10,7 @@ class ConsoleInfoHandler(logging.StreamHandler):
             self.setLevel(logging.DEBUG)
 
 class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
-        
+    
     def emit(self, record):
         """
         Emit a record.
@@ -69,7 +69,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
                 smtp.ehlo() # for tls add this line
                 smtp.login(self.username, self.password)
             
-            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            #smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
         except (KeyboardInterrupt, SystemExit):
             raise
@@ -79,18 +79,34 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
 
 class ColorFormatter(logging.Formatter):
     
-    BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+    BLACK= (0,30)
+    RED= (0,31)
+    LRED= (1,31)
+    
+    GREEN= (0,32)
+    LGREEN=(1,32)
+    
+    YELLOW=(0,33)
+    LYELLOW=(1,33)
+    
+    BLUE=(0,34)
+    MAGENTA=(0,35)
+    
+    CYAN=(0,36)
+    LCYAN=(1,36)
+    
+    WHITE=(0,37)
     
     COLORS = {
-        'WARNING'  : YELLOW,
-        'INFO'     : WHITE,
-        'DEBUG'    : BLUE,
-        'CRITICAL' : YELLOW,
-        'ERROR'    : RED,
+        'WARNING'  : LYELLOW,
+        'INFO'     : LGREEN,
+        'DEBUG'    : LCYAN,
+        'CRITICAL' : LYELLOW,
+        'ERROR'    : LRED,
     }
-    
+        
     RESET_SEQ = "\033[0m"
-    COLOR_SEQ = "\033[1;%dm"
+    COLOR_SEQ = "\033[%d;%dm"
     
     def __init__(self, *args, **kwargs):
         # can't do super(...) here because Formatter is an old school class
@@ -98,12 +114,11 @@ class ColorFormatter(logging.Formatter):
 
     def format(self, record):
         levelname = record.levelname
-        color     = self.COLOR_SEQ % (30 + self.COLORS[levelname])
+        
+        text_color= self.COLOR_SEQ % self.COLORS[levelname]
+        
         message   = logging.Formatter.format(self, record)
         message   = message.replace("$RESET", self.RESET_SEQ)\
-                           .replace("$COLOR", color)
-        for k,v in self.COLORS.items():
-            message = message.replace("$" + k,    self.COLOR_SEQ % (v+30))\
-                             .replace("$BG" + k,  self.COLOR_SEQ % (v+40))\
-                             .replace("$BG-" + k, self.COLOR_SEQ % (v+40))
+                           .replace("$COLOR", text_color)
+                             
         return message + self.RESET_SEQ
