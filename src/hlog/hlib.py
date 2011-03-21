@@ -23,7 +23,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         subject = self.subject
         fromaddr = self.fromaddr
         username = self.username
-        
+
         try:
             import smtplib
             import string # for tls add this line
@@ -42,14 +42,13 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             msg = self.format(record)
             
             output_msg=[]
-            output_msg.append("From :%s"%self.fromaddr)
-            output_msg.append("To :%s"%string.join(self.toaddrs, ","))
-            output_msg.append("Subject: %s"%self.getSubject(record))
-            output_msg.append("Date: %s"%formatdate())
+            output_msg.append("From :%s\r\n"%self.fromaddr)
+            output_msg.append("To :%s\r\n"%string.join(self.toaddrs, ","))
+            output_msg.append("Subject: %s\r\n"%self.getSubject(record))
+            output_msg.append("Date: %s\r\n\r\n"%formatdate())
             output_msg.append("%s :"%msg)
             
-            
-            msg="\r\n".join(output_msg)
+            msg= "".join(output_msg)
             
             if self.username:
                 smtp.ehlo() # for tls add this line
