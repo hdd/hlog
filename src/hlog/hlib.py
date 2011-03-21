@@ -10,6 +10,7 @@ class ConsoleInfoHandler(logging.StreamHandler):
             self.setLevel(logging.DEBUG)
 
 class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
+        
     def emit(self, record):
         """
         Emit a record.
@@ -19,7 +20,6 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         original code from 
         #http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to-use-gmail-smtp-server.txt.
         """
-        
         try:
             import smtplib
             import string # for tls add this line
@@ -38,15 +38,19 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             msg = self.format(record)
             
             filename = os.path.basename(record.pathname)
-            
             #    TODO : CREATE HTML EMAIL
             body=[]
-            body.append("USER : %s"%os.environ["USER"])
-            body.append("PATH : \n%s"%(pformat(os.environ["PATH"].split(":"))))
+            body.append("USER:\n\t%s"%os.environ["USER"])
+            body.append("HOSTNAME :\n\t%s"%(pformat(os.environ["HOSTNAME"])))
             
-            if "PYTHON_PATH" in os.environ:
-                body.append("PYTHON PATH : \n%s"%os.environ["PYTHON_PATH"])
+            if "LOADEDMODULES" in os.environ:
+                body.append("MODULES:\n%s"%(pformat(os.environ["LOADEDMODULES"])))
 
+            if "PYTHON_PATH" in os.environ:
+                body.append("PYTHON PATH:\n\t%s"%os.environ["PYTHON_PATH"])
+            
+            body.append("PATH:\n%s"%(pformat(os.environ["PATH"].split(":"))))
+            
             body.append(msg)
             body="\n\n".join(body)
             
