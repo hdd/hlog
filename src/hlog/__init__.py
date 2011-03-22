@@ -7,7 +7,12 @@ config = 'hConf.config'
 cur_folder=os.path.join(os.path.dirname(__file__),config)
 logging.config.fileConfig(cur_folder)
 
-debug = logging.debug
-info = logging.info
-warning = logging.warning
-error = logging.exception
+if "DEBUG" in os.environ:
+	mlog=logging.getLogger("debug")
+else:
+	mlog=logging.getLogger("root")
+
+debug = mlog.debug
+info = mlog.info
+warning = mlog.warning
+error = mlog.exception

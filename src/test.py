@@ -5,7 +5,8 @@ import hlog as log
 
 class MyTest(object):
     def __init__(self):
-        log.info("info mode")
+	for i in range(10):
+        	log.info("info mode")
                 
     def print1(self):
         log.debug("debug mode")
