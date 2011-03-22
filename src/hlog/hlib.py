@@ -42,6 +42,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             #    TODO : CREATE HTML EMAIL
             
             body={}
+            body["FILENAME"]="%s"%filename
             body["USER"]="%s"%os.environ["USERNAME"]
             body["HOST"]="%s"%(os.environ["HOSTNAME"])
             body["FILE"]='<a href="file://%s">%s</a>'%(record.pathname,record.pathname)
@@ -54,6 +55,8 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             
             body["PATH"]="<br \>".join(os.environ["PATH"].split(":"))
             body["SHELL"]="%s"%os.environ["SHELL"]
+            body["PYTHON"]="%s"%sys.executable
+            body["PYVERSION"]="%s"%sys.version
             body["MSG"]="%s"%msg
             
             plain_body=[]
