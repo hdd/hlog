@@ -5,9 +5,6 @@ from pprint import pformat
 class ConsoleInfoHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
         logging.StreamHandler.__init__(self, *args, **kwargs)
-        
-        if os.environ.has_key("DEBUG"):
-            self.setLevel(logging.DEBUG)
 
 class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
     
