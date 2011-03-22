@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import os,sys
+
 import hlog as log
+
 
 class MyTest(object):
     def __init__(self):

@@ -19,6 +19,9 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         """
         try:
             import smtplib
+            from email.mime.multipart import MIMEMultipart
+            from email.mime.text import MIMEText
+
             import string # for tls add this line
             
             try:
@@ -35,39 +38,60 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             msg = self.format(record)
             
             filename = os.path.basename(record.pathname)
+            
             #    TODO : CREATE HTML EMAIL
-            body=[]
-            body.append("USER:\n\t%s"%os.environ["USER"])
-            body.append("HOSTNAME :\n\t%s"%(pformat(os.environ["HOSTNAME"])))
+            
+            body={}
+            body["USER"]="%s"%os.environ["USERNAME"]
+            body["HOST"]="%s"%(os.environ["HOSTNAME"])
+            body["FILE"]='<a href="file://%s">%s</a>'%(record.pathname,record.pathname)
             
             if "LOADEDMODULES" in os.environ:
-                body.append("MODULES:\n%s"%(pformat(os.environ["LOADEDMODULES"])))
+                body["MODULES"]=("<br \>".join(os.environ["LOADEDMODULES"].split(":")))
 
-            if "PYTHON_PATH" in os.environ:
-                body.append("PYTHON PATH:\n\t%s"%os.environ["PYTHON_PATH"])
+            if "PYTHONPATH" in os.environ:
+                body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))
             
-            body.append("PATH:\n%s"%(pformat(os.environ["PATH"].split(":"))))
+            body["PATH"]="<br \>".join(os.environ["PATH"].split(":"))
+            body["SHELL"]="%s"%os.environ["SHELL"]
+            body["MSG"]="%s"%msg
             
-            body.append(msg)
-            body="\n\n".join(body)
+            plain_body=[]
+            for k,v in body.iteritems():
+                plain_body.append("%s %s"%(k,v))
+                
+            plain_body="\n".join(plain_body)
             
-            output_msg=[]
-            output_msg.append("From :%s\r\n"%self.fromaddr)
-            output_msg.append("To :%s\r\n"%string.join(self.toaddrs, ","))
-            output_msg.append("Subject: %s %s\r\n"%(self.getSubject(record),filename))
-            output_msg.append("Date: %s\r\n\r\n"%formatdate())
-            output_msg.append("%s"%body)
+            template=open(os.path.join(os.path.dirname(__file__),"template.html"),"r")
+            html_body = str(template.read()).format(**body)
             
-            msg= "".join(output_msg)
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] ="%s %s"%(self.getSubject(record),filename)
+            msg['From'] = self.fromaddr
+            msg['To'] =",".join(self.toaddrs)
             
+            
+            plain = MIMEText(plain_body, 'plain')
+            html = MIMEText(html_body, 'html')
+            
+            msg.attach(plain)
+            msg.attach(html)
+        
+#            print pformat(record.__dict__)
+#            return
+        
             if self.username:
                 smtp.ehlo() # for tls add this line
                 smtp.starttls() # for tls add this line
                 smtp.ehlo() # for tls add this line
                 smtp.login(self.username, self.password)
+            try:
+                smtp.sendmail(self.fromaddr, self.toaddrs, msg.as_string())
+            except:
+                raise Exception , "EMAIL NOT SENT"
             
-            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
+            
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
