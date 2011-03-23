@@ -1,4 +1,5 @@
 import os,sys
+import datetime
 import logging
 from pprint import pformat
 
@@ -29,72 +30,85 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             except ImportError:
                 formatdate = self.date_time
                 
+            #	setup smtp
             port = self.mailport
             
             if not port:
                 port = smtplib.SMTP_PORT
                 
             smtp = smtplib.SMTP(self.mailhost, port)
+            
+            #	format the input message
             msg = self.format(record)
             
+            #	get the file name
             filename = os.path.basename(record.pathname)
-            
-            #    TODO : CREATE HTML EMAIL
-            
+			
+			#	start collecting the informations
             body={}
             body["FILENAME"]="%s"%filename
             body["USER"]="%s"%os.environ["USERNAME"]
             body["HOST"]="%s"%(os.environ["HOSTNAME"])
             body["FILE"]='<a href="file://%s">%s</a>'%(record.pathname,record.pathname)
+            body["DATETIME"]=datetime.datetime.now()
+            body["PYTHONPATH"]="None"
+            body["LOADEDMODULES"]="None"
             
             if "LOADEDMODULES" in os.environ:
                 body["MODULES"]=("<br \>".join(os.environ["LOADEDMODULES"].split(":")))
-
+			
             if "PYTHONPATH" in os.environ:
-                body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))
-            
+                body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))				
+				
             body["PATH"]="<br \>".join(os.environ["PATH"].split(":"))
             body["SHELL"]="%s"%os.environ["SHELL"]
             body["PYTHON"]="%s"%sys.executable
             body["PYVERSION"]="%s"%sys.version
-            body["MSG"]="%s"%msg
+            body["CURDIR"]="%s"%os.path.abspath(os.curdir)
+            body["MSG"]="%s"%("<br \>".join(msg.split(",")))
             
+            #	generate a plain body text
             plain_body=[]
             for k,v in body.iteritems():
                 plain_body.append("%s %s"%(k,v))
                 
             plain_body="\n".join(plain_body)
-            
+                      
+            #	fill the html with the collected data
             template=open(os.path.join(os.path.dirname(__file__),"template.html"),"r")
             html_body = str(template.read()).format(**body)
-            
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] ="%s %s"%(self.getSubject(record),filename)
-            msg['From'] = self.fromaddr
-            msg['To'] =",".join(self.toaddrs)
-            
-            
+  
+			#	define the email contents
             plain = MIMEText(plain_body, 'plain')
             html = MIMEText(html_body, 'html')
             
+            #	set the email
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] ="%s %s"%(self.getSubject(record),filename)
+            msg['From'] = self.fromaddr
+            
+            #	we send back an email to the user 
+            msg['To'] =",".join(self.toaddrs)
+            
+            #	fill the email content    
             msg.attach(plain)
             msg.attach(html)
-        
-#            print pformat(record.__dict__)
-#            return
-        
+			
+			#	login to email account
             if self.username:
                 smtp.ehlo() # for tls add this line
                 smtp.starttls() # for tls add this line
                 smtp.ehlo() # for tls add this line
                 smtp.login(self.username, self.password)
+            
+            
             try:
                 smtp.sendmail(self.fromaddr, self.toaddrs, msg.as_string())
             except:
                 raise Exception , "EMAIL NOT SENT"
             
             smtp.quit()
-            
+            logging.warning("A Report Email is been sent to %s"%",".join(self.toaddrs))
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
