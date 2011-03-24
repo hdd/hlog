@@ -8,6 +8,7 @@ cur_folder=os.path.join(os.path.dirname(__file__),config)
 logging.config.fileConfig(cur_folder)
 mlog=logging.getLogger("root")
 
+#    check for the DEBUG ENV , if it's set , enable the debug
 DEBUGMODE=os.getenv("DEBUG")
 
 if DEBUGMODE == "1":

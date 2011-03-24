@@ -5,30 +5,39 @@ import os,sys
 import hlog as log
 
 
+log.debug("starting test.")
+
 class MyTest(object):
     def __init__(self):
-	for i in range(10):
-        	log.info("info mode")
+        log.debug("running init")
+        for i in range(10):
+            log.info("info mode")
                 
     def print1(self):
+        log.debug("running print 1")
         log.debug("debug mode")
         
-    def print2(self):
-        try:
-            0/0
-        except:
-            log.error("critical Error")
-        
     def print3(self):
+        log.debug("print 3 , here we raise an exception")
+        value = 0/0
+        
+    def print2(self):
+        log.debug("running print 2")
         log.warning("warning mode")
         
         
 class TestTest(MyTest):
     def __init__(self):
+        log.debug("init subclass")
         super(TestTest,self).__init__()
-    
-    
+        
+        
 T=TestTest()
-T.print1()
-T.print3()
-T.print2()
+
+try:
+    T.print1()
+    T.print2()
+    T.print3()
+except:
+    log.error("Error found")
+    

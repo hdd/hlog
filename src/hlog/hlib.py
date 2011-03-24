@@ -18,6 +18,8 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         original code from 
         #http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to-use-gmail-smtp-server.txt.
         """
+        
+        return 
         try:
             import smtplib
             from email.mime.multipart import MIMEMultipart
@@ -30,7 +32,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             except ImportError:
                 formatdate = self.date_time
                 
-            #	setup smtp
+            #    setup smtp
             port = self.mailport
             
             if not port:
@@ -38,63 +40,68 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
                 
             smtp = smtplib.SMTP(self.mailhost, port)
             
-            #	format the input message
+            #    format the input message
             msg = self.format(record)
             
-            #	get the file name
+            #    get the file name
             filename = os.path.basename(record.pathname)
-			
-			#	start collecting the informations
+            
+            logging.debug("getting script and system information...")
+            
+            #    start collecting the informations
             body={}
             body["FILENAME"]="%s"%filename
             body["USER"]="%s"%os.environ["USERNAME"]
             body["HOST"]="%s"%(os.environ["HOSTNAME"])
-            body["FILE"]='<a href="file://%s">%s</a>'%(record.pathname,record.pathname)
+            body["FILE"]='<a href="file://%s">%s</a>'%(os.path.abspath(record.pathname),os.path.abspath(record.pathname))
+            body["ARGS"]="None"
             body["DATETIME"]=datetime.datetime.now()
             body["PYTHONPATH"]="None"
             body["LOADEDMODULES"]="None"
             
+            if len(sys.argv) > 1:
+                body["ARGS"]=" ".join(sys.argv[1:])
+            
             if "LOADEDMODULES" in os.environ:
                 body["MODULES"]=("<br \>".join(os.environ["LOADEDMODULES"].split(":")))
-			
+            
             if "PYTHONPATH" in os.environ:
-                body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))				
-				
+                body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))                
+                
             body["PATH"]="<br \>".join(os.environ["PATH"].split(":"))
             body["SHELL"]="%s"%os.environ["SHELL"]
             body["PYTHON"]="%s"%sys.executable
             body["PYVERSION"]="%s"%sys.version
-            body["CURDIR"]="%s"%os.path.abspath(os.curdir)
             body["MSG"]="%s"%("<br \>".join(msg.split(",")))
             
-            #	generate a plain body text
+            #    generate a plain body text
             plain_body=[]
             for k,v in body.iteritems():
                 plain_body.append("%s %s"%(k,v))
                 
             plain_body="\n".join(plain_body)
-                      
-            #	fill the html with the collected data
+                    
+            #    fill the html with the collected data
             template=open(os.path.join(os.path.dirname(__file__),"template.html"),"r")
             html_body = str(template.read()).format(**body)
-  
-			#	define the email contents
+
+            #    define the email contents
             plain = MIMEText(plain_body, 'plain')
             html = MIMEText(html_body, 'html')
             
-            #	set the email
+            #    set the email
             msg = MIMEMultipart('alternative')
             msg['Subject'] ="%s %s"%(self.getSubject(record),filename)
             msg['From'] = self.fromaddr
             
-            #	we send back an email to the user 
+            #    we send back an email to the user 
             msg['To'] =",".join(self.toaddrs)
             
-            #	fill the email content    
+            #    fill the email content    
             msg.attach(plain)
             msg.attach(html)
-			
-			#	login to email account
+            
+            #    login to email account
             if self.username:
                 smtp.ehlo() # for tls add this line
                 smtp.starttls() # for tls add this line
@@ -105,7 +112,7 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             try:
                 smtp.sendmail(self.fromaddr, self.toaddrs, msg.as_string())
             except:
-                raise Exception , "EMAIL NOT SENT"
+                raise smtp.SMTPException , "EMAIL NOT SENT"
             
             smtp.quit()
             logging.warning("A Report Email is been sent to %s"%",".join(self.toaddrs))
