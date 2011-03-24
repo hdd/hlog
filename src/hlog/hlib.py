@@ -19,7 +19,6 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
         #http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to-use-gmail-smtp-server.txt.
         """
         
-        return 
         try:
             import smtplib
             from email.mime.multipart import MIMEMultipart
