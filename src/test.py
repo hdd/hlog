@@ -4,7 +4,6 @@ import os,sys
 
 import hlog as log
 
-
 log.debug("starting test.")
 
 class MyTest(object):

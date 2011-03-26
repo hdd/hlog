@@ -6,7 +6,7 @@ from pprint import pformat
 class ConsoleInfoHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
         logging.StreamHandler.__init__(self, *args, **kwargs)
-
+        
 class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
     
     def emit(self, record):
@@ -153,7 +153,6 @@ class ColorFormatter(logging.Formatter):
     COLOR_SEQ = "\033[%d;%dm"
     
     def __init__(self, *args, **kwargs):
-        # can't do super(...) here because Formatter is an old school class
         logging.Formatter.__init__(self, *args, **kwargs)
 
     def format(self, record):
@@ -162,7 +161,14 @@ class ColorFormatter(logging.Formatter):
         text_color= self.COLOR_SEQ % self.COLORS[levelname]
         
         message   = logging.Formatter.format(self, record)
-        message   = message.replace("$RESET", self.RESET_SEQ)\
-                           .replace("$COLOR", text_color)
-                             
-        return message + self.RESET_SEQ
+        
+        color_message=[]
+        color_message.append(text_color)
+        color_message.append(message)
+        color_message.append(self.RESET_SEQ)
+        color_message="".join(color_message)
+                        
+        if sys.stdin.isatty():
+            message=color_message
+#                             
+        return message 
