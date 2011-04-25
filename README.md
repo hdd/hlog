@@ -9,14 +9,15 @@ hlog is an "almost configured" logging python module, which permits to have:
 * in case of exception an email will be sent to the destination address listed in the config file
 * debug mode disable the email and redirect it to the standard output
 
-to use it
+how to
 ---
 
+To start using it, 
 just include the folder in your PYTHONPATH env:
 
-*`export PYTHONPATH=<path to the hlog source folder>`
-*`setenv PYTHONPATH <path to the hlog source folder>`
-*`import sys ; sys.path.insert(0,<path to the hlog source folder>)`
+* export PYTHONPATH=<path to the hlog source folder>
+* setenv PYTHONPATH <path to the hlog source folder>
+* import sys ; sys.path.insert(0,<path to the hlog source folder>)
 
 
 modify the email addresses as required
