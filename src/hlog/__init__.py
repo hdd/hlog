@@ -25,6 +25,7 @@ def get_config_path():
     if "LOG_CONFIG" in os.environ.keys():
         return os.environ["LOG_CONFIG_PATH"]
     else:
+        # ok this should avoided , but it's quite useful for local work...
         cur_folder=os.path.dirname(__file__)
         logging.debug("lookging into local folder %s"%cur_folder)
         return os.path.join(cur_folder,'hConf.config')
@@ -34,6 +35,8 @@ def get_config_path():
 #    setup the config file
 config_file_path = os.path.join(get_config_path())
 logging.config.fileConfig(config_file_path)
+
+#set the default logger to root
 __mlog=logging.getLogger("root")
 
 #    check for the DEBUG ENV , if it's set , enable the debug
