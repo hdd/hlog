@@ -15,9 +15,9 @@ how to
 To start using it, 
 just include the folder in your PYTHONPATH env:
 
-* export PYTHONPATH=<path to the hlog source folder>
-* setenv PYTHONPATH <path to the hlog source folder>
-* import sys ; sys.path.insert(0,<path to the hlog source folder>)
+* export PYTHONPATH=\<path to the hlog source folder\>
+* setenv PYTHONPATH \<path to the hlog source folder\>
+* import sys ; sys.path.insert(0,\<path to the hlog source folder\>)
 
 
 
