@@ -168,6 +168,8 @@ class ColorFormatter(logging.Formatter):
         color_message.append(self.RESET_SEQ)
         color_message="".join(color_message)
                         
+        #    check if the execution of the code is in a tty (console)
+        #    if it's so , enable the colors 
         if sys.stdin.isatty():
             message=color_message
 #                             
