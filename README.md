@@ -21,6 +21,6 @@ just include the folder in your PYTHONPATH env:
 
 
 
-modify the email addresses as required, 
+modify the email addresses as required:
 * line 40 of config file
 
