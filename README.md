@@ -20,7 +20,6 @@ just include the folder in your PYTHONPATH env:
 * import sys ; sys.path.insert(0,\<path to the hlog source folder\>)
 
 
-
-modify the email addresses as required:
+Modify the email addresses as required:
 * line 40 of config file
 
