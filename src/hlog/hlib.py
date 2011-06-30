@@ -51,7 +51,10 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             body={}
             body["FILENAME"]="%s"%filename
             body["USER"]="%s"%os.environ["USERNAME"]
-            body["HOST"]="%s"%(os.environ["HOSTNAME"])
+            try:
+                body["HOST"]="%s"%(os.environ["HOSTNAME"])
+            except:
+                body["HOST"]="%s"%(os.environ["COMPUTERNAME"])
             body["FILE"]='<a href="file://%s">%s</a>'%(os.path.abspath(record.pathname),os.path.abspath(record.pathname))
             body["ARGS"]="None"
             body["DATETIME"]=datetime.datetime.now()
@@ -68,7 +71,10 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
                 body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))                
                 
             body["PATH"]="<br \>".join(os.environ["PATH"].split(":"))
-            body["SHELL"]="%s"%os.environ["SHELL"]
+            try:
+                body["SHELL"]="%s"%os.environ["SHELL"]
+            except:
+                body["SHELL"] = "bash"
             body["PYTHON"]="%s"%sys.executable
             body["PYVERSION"]="%s"%sys.version
             body["MSG"]="%s"%("<br \>".join(msg.split(",")))
