@@ -66,7 +66,8 @@ class GMAIL_SMTPHandler(logging.handlers.SMTPHandler):
             
             if "LOADEDMODULES" in os.environ:
                 body["MODULES"]=("<br \>".join(os.environ["LOADEDMODULES"].split(":")))
-            
+            else:
+                body["MODULES"] = ""
             if "PYTHONPATH" in os.environ:
                 body["PYTHONPATH"]=("<br \>".join(os.environ["PYTHONPATH"].split(":")))                
                 
@@ -176,7 +177,7 @@ class ColorFormatter(logging.Formatter):
                         
         #    check if the execution of the code is in a tty (console)
         #    if it's so , enable the colors 
-        if sys.stdin.isatty():
-            message=color_message
+        #if sys.stdin.isatty():
+        #    message=color_message
 #                             
         return message 
