@@ -26,3 +26,4 @@ email
 Modify the email addresses as required:
 * line 41 of config file
 
+thanks to dor the windowns fixes
